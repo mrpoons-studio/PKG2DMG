@@ -35,7 +35,7 @@ copy_to_dmg() {
 # Call pbzx.py to decompress the payload
 decompress_payload() {
     echo "Decompressing Payload..."
-    cp $(dirname "$0")/pbzx.py $mount_point    
+    rsync -az $(dirname "$0")/pbzx.py $mount_point    
     cd $mount_point    
     python3 $mount_point/pbzx.py -n Payload | cpio -idmu
     mv Applications/* $mount_point/
@@ -111,7 +111,7 @@ main() {
     [ "$UID" -eq 0 ] || { echo "This script must be run as root."; exit 1;}
    
    
-    display_art 
+    # display_art 
 
     # Get user inputs
     echo "Enter the output directory for the DMG file: " 
@@ -138,8 +138,8 @@ main() {
     # Create blank DMG
     create_blank_dmg "$dmg_path"
 
-    # Format DMG with HFS+
-    format_dmg_hfs "$dmg_path"
+    # Format DMG with APFS
+    format_dmg_apfs "$dmg_path"
 
     # Extract .pkg
     extract_pkg "$pkg_file" "$extract_dir"

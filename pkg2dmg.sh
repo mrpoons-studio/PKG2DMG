@@ -23,6 +23,7 @@ get_inputs() {
     mount_point="/mnt/apfs_dmg"
     extract_dir="/tmp/pkg_extracted"
 }
+
 # Create a blank 16GB DMG file
 create_blank_dmg() {
     echo "Creating a 16GB DMG file at $dmg_path..."
@@ -138,11 +139,11 @@ EOF
 }
 # Main function
 main() {
-    # printf '\e[107m\e[1;30m' 
+    printf '\e[107m\e[1;30m' 
     [ "$UID" -eq 0 ] || { echo "This script must be run as root."; exit 1;}
 
     # Display art to welcome users
-    # display_art 
+    display_art 
 
     # Get user inputs
     get_inputs

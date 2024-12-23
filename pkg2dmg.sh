@@ -3,20 +3,20 @@
 # Create a blank 16GB DMG file
 create_blank_dmg() {
     echo "Creating a 16GB DMG file at $dmg_path..."
-    dd if=/dev/zero of=$dmg_path bs=1M count=16384
+    dd if=/dev/zero of=$dmg_path bs=1G count=16384
 }
 
 # Format the DMG with HFS+
-format_dmg_hfs() {
-    echo "Formatting with HFS+..."
-    mkfs.hfsplus -v macOS_Installer $dmg_path
+format_dmg_apfs() {
+    echo "Formatting with APFS..."
+    mkfs.apfs -v macOS_Installer $dmg_path
 }
 
 # Extract .pkg file
 extract_pkg() {
     echo "Extracting .pkg..."
     mkdir -p $extract_dir
-    7z x -txar $pkg_file -o$extract_dir SharedSupport.dmg Payload
+    7z x -mmt$(nproc --all) -txar $pkg_file -o$extract_dir SharedSupport.dmg Payload
 }
 
 # Mount the DMG file
@@ -29,7 +29,7 @@ mount_dmg() {
 # Copy files to the mounted DMG
 copy_to_dmg() {
     echo "Copying files...(May take a while!)"
-    sudo cp -r $extract_dir/* $mount_point/
+    sudo rsync -az $extract_dir/* $mount_point/
 }
 
 # Call pbzx.py to decompress the payload

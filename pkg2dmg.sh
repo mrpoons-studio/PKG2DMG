@@ -1,5 +1,28 @@
 #!/bin/bash
 
+# Get user inputs
+get_inputs() {
+    echo "Enter the output directory for the DMG file: " 
+    read -r output_dir
+    output_dir=$(echo "$output_dir"| sed "s/'//g")
+    echo "Enter the path to the .pkg file: " 
+    read -r pkg_file
+    pkg_file=$(echo "$pkg_file"| sed "s/'//g")
+
+    # Validate inputs
+    if [ ! -d "$output_dir" ]; then
+        echo "Error: Output directory $output_dir does not exist."
+        exit 1
+    fi
+    if [ ! -f "$pkg_file" ]; then
+        echo "Error: .pkg file $pkg_file does not exist."
+        exit 1
+    fi
+
+    dmg_path="$output_dir/InstallMacOS.dmg"
+    mount_point="/mnt/apfs_dmg"
+    extract_dir="/tmp/pkg_extracted"
+}
 # Create a blank 16GB DMG file
 create_blank_dmg() {
     echo "Creating a 16GB DMG file at $dmg_path..."
@@ -53,6 +76,14 @@ unmount_dmg() {
     echo "Unmounting..."
     sudo umount $mount_point
 }
+
+# Clean up all the temporary files
+cleanup() {
+    echo "Cleaning up..."
+    rm -rf "$extract_dir"
+    echo "Process completed successfully."
+}
+
 display_art(){
     clear
     printf '\e[8;46;101t'  
@@ -107,34 +138,15 @@ EOF
 }
 # Main function
 main() {
-    printf '\e[107m\e[1;30m' 
+    # printf '\e[107m\e[1;30m' 
     [ "$UID" -eq 0 ] || { echo "This script must be run as root."; exit 1;}
-   
-   
+
+    # Display art to welcome users
     # display_art 
 
     # Get user inputs
-    echo "Enter the output directory for the DMG file: " 
-    read -r output_dir
-    output_dir=$(echo "$output_dir"| sed "s/'//g")
-    echo "Enter the path to the .pkg file: " 
-    read -r pkg_file
-    pkg_file=$(echo "$pkg_file"| sed "s/'//g")
-
-    # Validate inputs
-    if [ ! -d "$output_dir" ]; then
-        echo "Error: Output directory $output_dir does not exist."
-        exit 1
-    fi
-    if [ ! -f "$pkg_file" ]; then
-        echo "Error: .pkg file $pkg_file does not exist."
-        exit 1
-    fi
-
-    dmg_path="$output_dir/InstallMacOS.dmg"
-    mount_point="/mnt/hfs_dmg"
-    extract_dir="/tmp/pkg_extracted"
-
+    get_inputs
+    
     # Create blank DMG
     create_blank_dmg "$dmg_path"
 
@@ -157,9 +169,7 @@ main() {
     unmount_dmg "$mount_point"
 
     # Clean up
-    echo "Cleaning up..."
-    rm -rf "$extract_dir"
-    echo "Process completed successfully."
+    cleanup
 }
 
 # Run the main function
